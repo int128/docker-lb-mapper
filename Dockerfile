@@ -1,6 +1,3 @@
-from centos:centos7
-
-run yum install -y docker
-volume /containers
-add provision.sh /
-cmd /provision.sh
+from node:onbuild
+env mapfile /etc/nginx/containers/map
+cmd ["node", "app.js"]
