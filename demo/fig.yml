@@ -1,0 +1,20 @@
+nginx:
+  image: dockerfile/nginx
+  ports:
+    - "80:80"
+  volumes:
+    - /etc/nginx/containers
+    - sites-enabled:/etc/nginx/sites-enabled:ro
+mapper:
+  image: int128/docker-lb-mapper
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+  volumes_from:
+    - nginx
+
+
+# Example web server at http://helloworld.lvh.me
+helloworld:
+  image: dockerfile/nginx
+  hostname: helloworld
+  domainname: lvh.me
