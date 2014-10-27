@@ -1,7 +1,5 @@
 Settings =
   mapfile: process.env.mapfile || 'containers'
-  prefix:  process.env.prefix  || ''
-  postfix: process.env.postfix || ''
 
 Docker      = require 'dockerode'
 JSONStream  = require 'JSONStream'
@@ -56,7 +54,7 @@ findLoadBalancers = (inspects) ->
 
 formatter = (inspects) ->
   inspects.map (inspect) ->
-    "#{Settings.prefix}#{inspect.Name.slice 1}#{Settings.postfix} #{inspect.NetworkSettings.IPAddress};"
+    "#{inspect.Config.Hostname}.#{inspect.Config.Domainname} #{inspect.NetworkSettings.IPAddress};"
   .join '\n'
 
 # Workaround for dockerode kill API
