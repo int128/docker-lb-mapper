@@ -54,7 +54,10 @@ findLoadBalancers = (inspects) ->
 
 formatter = (inspects) ->
   inspects.map (inspect) ->
-    "#{inspect.Config.Hostname}.#{inspect.Config.Domainname} #{inspect.NetworkSettings.IPAddress};"
+    if inspect.Config.Domainname
+      "#{inspect.Config.Hostname}.#{inspect.Config.Domainname} #{inspect.NetworkSettings.IPAddress};"
+    else
+      "#{inspect.Config.Hostname} #{inspect.NetworkSettings.IPAddress};"
   .join '\n'
 
 # Workaround for dockerode kill API
