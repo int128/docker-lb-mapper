@@ -40,7 +40,7 @@ provision = ->
           findLoadBalancers inspects
             .map (lb) ->
               console.info "Sending singal to reload #{lb.Name} #{lb.Id}"
-              Q.ninvoke workaroundKill(docker.getContainer(lb.Id)), 'kill', signal: 'SIGHUP'
+              Q.ninvoke docker.getContainer(lb.Id), 'kill', signal: 'SIGHUP'
     .all()
     .then ->
       console.info 'Provisioning done'
@@ -59,22 +59,4 @@ formatter = (inspects) ->
     else
       "#{inspect.Config.Hostname} #{inspect.NetworkSettings.IPAddress};"
   .join '\n'
-
-# Workaround for dockerode kill API
-# TODO: remove if updated to v2.0.4 or later
-workaroundKill = (container) ->
-  container.kill = (opts, callback) ->
-    if !callback && typeof(opts) == 'function'
-      callback = opts
-      opts = null
-    optsf =
-      path: '/containers/' + @id + '/kill?'
-      method: 'POST'
-      statusCodes:
-        204: true
-        404: "no such container"
-        500: "server error"
-      options: opts
-    @modem.dial optsf, (err, data) -> callback(err, data)
-  container
 
