@@ -1,5 +1,5 @@
 {
-  "name": "nginx-docker-proxy",
+  "name": "docker-lb-mapper",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
