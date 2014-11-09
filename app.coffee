@@ -1,5 +1,9 @@
 Settings =
   mapfile: process.env.mapfile || 'containers'
+  allowPorts: process.env.allowPorts?.split(',') || [80, 8080]
+
+require 'array.prototype.find'
+require 'string.prototype.endswith'
 
 Docker      = require 'dockerode'
 JSONStream  = require 'JSONStream'
@@ -8,6 +12,8 @@ fs          = require 'fs'
 os          = require 'os'
 
 docker      = new Docker socketPath: '/var/run/docker.sock'
+
+console.info Settings
 
 Q.ninvoke docker, 'ping'
   .then ->
@@ -54,9 +60,17 @@ findLoadBalancers = (inspects) ->
 
 formatter = (inspects) ->
   inspects.map (inspect) ->
-    if inspect.Config.Domainname
-      "#{inspect.Config.Hostname}.#{inspect.Config.Domainname} #{inspect.NetworkSettings.IPAddress};"
+    fqdn = "#{inspect.Config.Hostname}#{inspect.Config.Domainname && '.' || ''}#{inspect.Config.Domainname}"
+    if port = findDestinationPort inspect
+      "#{fqdn} #{inspect.NetworkSettings.IPAddress}:#{port};"
     else
-      "#{inspect.Config.Hostname} #{inspect.NetworkSettings.IPAddress};"
+      "# #{fqdn} #{inspect.NetworkSettings.IPAddress};"
   .join '\n'
+
+findDestinationPort = (inspect) ->
+  exposedPorts = Object.keys inspect.Config.ExposedPorts ? {}
+    .filter (port) -> port.endsWith '/tcp'
+    .map    (port) -> parseInt(port)
+  Settings.allowPorts
+    .find   (port) -> port in exposedPorts
 
